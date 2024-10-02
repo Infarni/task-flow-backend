@@ -4,6 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+actix-web = "4.9.0"
+async-trait = "0.1.83"
 clap = { version = "4.5.19", features = ["derive"] }
 config = "0.14.0"
+log = "0.4.22"
+sea-orm = { version = "1.0.1", features = ["sqlx-postgres", "runtime-tokio-rustls", "macros", "with-chrono", "with-uuid"] }
+sea-orm-migration = { version = "1.0.1", features = ["runtime-actix-rustls", "sqlx-postgres", "with-chrono", "with-uuid"] }
 serde = { version = "1.0.210", features = ["derive"] }
+thiserror = "1.0.64"
