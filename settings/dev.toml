@@ -1,0 +1,11 @@
+[postgres]
+username = "postgres"
+password = "postgres"
+host = "localhost"
+port = 5432
+database_name = "postgres"
+current_schema = "public"
+
+[server]
+host = "127.0.0.1"
+port = 8080
