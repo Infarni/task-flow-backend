@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4.9.0"
+actix-web-httpauth = "0.8.2"
 argon2 = "0.5.3"
 async-trait = "0.1.83"
 chrono = "0.4.38"
@@ -12,6 +13,7 @@ clap = { version = "4.5.19", features = ["derive"] }
 config = "0.14.0"
 env_logger = "0.11.5"
 garde = { version = "0.20.0", features = ["derive", "email", "pattern", "serde", "regex"] }
+jsonwebtoken = "9.3.0"
 log = "0.4.22"
 sea-orm = { version = "1.0.1", features = ["sqlx-postgres", "runtime-tokio-rustls", "macros", "with-chrono", "with-uuid"] }
 sea-orm-migration = { version = "1.0.1", features = ["runtime-actix-rustls", "sqlx-postgres", "with-chrono", "with-uuid"] }

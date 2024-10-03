@@ -1,5 +1,5 @@
 use sea_orm::{
-    ActiveModelTrait, ColumnTrait, DatabaseConnection, DatabaseTransaction, EntityTrait,
+    ActiveModelTrait, ColumnTrait, Condition, DatabaseConnection, DatabaseTransaction, EntityTrait,
     IntoActiveModel, ModelTrait, QueryFilter, QuerySelect, Set, TransactionTrait, TryIntoModel,
 };
 use uuid::Uuid;
@@ -51,6 +51,26 @@ impl UserService {
         match UserEntity::find_by_id(id).one(&tx).await? {
             Some(value) => Ok(UserReadDto::from(value)),
             None => Err(ServiceError::NotFound(id)),
+        }
+    }
+
+    pub async fn get_by_login(
+        db: &DatabaseConnection,
+        login: String,
+    ) -> ServiceResult<(Uuid, String)> {
+        let tx: DatabaseTransaction = db.begin().await?;
+
+        match UserEntity::find()
+            .filter(
+                Condition::any()
+                    .add(UserColumn::Name.eq(login.clone()))
+                    .add(UserColumn::Email.eq(login.clone())),
+            )
+            .one(&tx)
+            .await?
+        {
+            Some(value) => Ok((value.id, value.password)),
+            None => Err(ServiceError::InvalidCredentials),
         }
     }
 

@@ -10,6 +10,7 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct State {
     pub postgres: PostgresClient,
+    pub config: Config,
 }
 
 pub struct Server {
@@ -22,7 +23,10 @@ impl State {
     pub async fn new(config: &Config) -> ServerResult<Self> {
         let postgres: PostgresClient = PostgresClient::from_config(config).await?;
 
-        Ok(Self { postgres })
+        Ok(Self {
+            config: config.clone(),
+            postgres,
+        })
     }
 }
 
@@ -42,7 +46,7 @@ impl Server {
             App::new()
                 .wrap(Logger::default())
                 .app_data(app_data.clone())
-                .service(service_configure())
+                .configure(service_configure)
         })
         .bind((self.host.clone(), self.port))
         {

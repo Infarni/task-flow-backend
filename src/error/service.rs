@@ -22,6 +22,12 @@ pub enum ServiceError {
     #[error("Error with hashing value")]
     Hash,
 
+    #[error("Error with creating token")]
+    Token,
+
+    #[error("Invalid credentials")]
+    InvalidCredentials,
+
     #[error("Unknow db error")]
     Unknow(#[from] DbErr),
 }
@@ -32,6 +38,7 @@ impl ResponseError for ServiceError {
             ServiceError::Conflict { field: _, value: _ } => StatusCode::CONFLICT,
             ServiceError::NotFound(_) => StatusCode::NOT_FOUND,
             ServiceError::Validation(_) => StatusCode::UNPROCESSABLE_ENTITY,
+            ServiceError::InvalidCredentials => StatusCode::UNAUTHORIZED,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

@@ -1,8 +1,13 @@
-use actix_web::{web, Scope};
-use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
+use utoipa::{
+    openapi::{
+        self,
+        security::{HttpBuilder, SecurityScheme},
+    },
+    Modify, OpenApi,
+};
 
 use crate::dto::{
+    auth::{SignInDto, TokenDto},
     error::{ErrorDto, ValidateItemErrorDto},
     user::{UserCreateDto, UserReadDto, UserUpdateDto},
 };
@@ -15,18 +20,33 @@ use crate::dto::{
         crate::api::user::search_user_handler,
         crate::api::user::update_user_handler,
         crate::api::user::delete_user_handler,
+        crate::api::auth::sign_in_handler
     ),
     components(schemas(
         UserCreateDto,
         UserReadDto,
         UserUpdateDto,
         ErrorDto,
-        ValidateItemErrorDto
-    ))
+        ValidateItemErrorDto,
+        SignInDto,
+        TokenDto
+    )),
+    modifiers(&BearerAuth)
 )]
 pub struct ApiDoc;
 
-pub fn get_scope() -> Scope {
-    web::scope("")
-        .service(SwaggerUi::new("/docs/{_:.*}").url("/docs/openapi.json", ApiDoc::openapi()))
+pub struct BearerAuth;
+impl Modify for BearerAuth {
+    fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
+        let components = openapi.components.as_mut().unwrap();
+        components.add_security_scheme(
+            "bearer_auth",
+            SecurityScheme::Http(
+                HttpBuilder::new()
+                    .scheme(openapi::security::HttpAuthScheme::Bearer)
+                    .bearer_format("JWT")
+                    .build(),
+            ),
+        );
+    }
 }
