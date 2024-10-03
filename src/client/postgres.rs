@@ -12,9 +12,7 @@ use super::ClientBuilder;
 pub type PostgresClient = DatabaseConnection;
 
 #[async_trait::async_trait]
-pub trait PostgresClientExt {
-    // async fn create(tx: &DatabaseTransaction, record: impl Into<Mode)
-}
+pub trait PostgresClientExt {}
 
 #[async_trait::async_trait]
 impl ClientBuilder for PostgresClient {

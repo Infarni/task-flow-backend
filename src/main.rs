@@ -7,6 +7,7 @@ use task_flow_backend::{
     client::{postgres::PostgresClient, ClientBuilder},
     config::Config,
     migration::Migrator,
+    server::Server,
 };
 
 #[derive(Debug, Parser)]
@@ -18,6 +19,8 @@ struct Args {
 
 #[actix_web::main]
 async fn main() {
+    env_logger::init();
+
     let args: Args = Args::parse();
     let config: Config = ConfigLoader::builder()
         .add_source(File::with_name(args.config.to_str().unwrap()))
@@ -31,4 +34,7 @@ async fn main() {
         .expect("Creating postgres client error");
 
     Migrator::up(&db, None).await.expect("Up migrations error");
+
+    let server: Server = Server::new(config).await.unwrap();
+    server.run().await.unwrap();
 }
