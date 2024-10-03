@@ -14,6 +14,7 @@ use crate::dto::{
         crate::api::user::get_user_handler,
         crate::api::user::search_user_handler,
         crate::api::user::update_user_handler,
+        crate::api::user::delete_user_handler,
     ),
     components(schemas(
         UserCreateDto,

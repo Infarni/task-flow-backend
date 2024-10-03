@@ -26,7 +26,7 @@ impl ClientBuilder for PostgresClient {
             .idle_timeout(Duration::from_secs(8))
             .max_lifetime(Duration::from_secs(8))
             .sqlx_logging(true)
-            .sqlx_logging_level(log::LevelFilter::Info);
+            .sqlx_logging_level(log::LevelFilter::Debug);
 
         match Database::connect(options).await {
             Ok(value) => Ok(value),

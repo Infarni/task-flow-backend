@@ -1,6 +1,6 @@
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, DatabaseTransaction, EntityTrait,
-    IntoActiveModel, QueryFilter, QuerySelect, Set, TransactionTrait, TryIntoModel,
+    IntoActiveModel, ModelTrait, QueryFilter, QuerySelect, Set, TransactionTrait, TryIntoModel,
 };
 use uuid::Uuid;
 
@@ -138,5 +138,20 @@ impl UserService {
         let schema: UserReadDto = UserReadDto::from(model);
 
         Ok(schema)
+    }
+
+    pub async fn delete(db: &DatabaseConnection, id: Uuid) -> ServiceResult {
+        let tx: DatabaseTransaction = db.begin().await?;
+
+        let model: UserModel = match UserEntity::find_by_id(id).one(&tx).await? {
+            Some(value) => value,
+            None => return Err(ServiceError::NotFound(id)),
+        };
+
+        model.delete(&tx).await?;
+
+        tx.commit().await?;
+
+        Ok(())
     }
 }

@@ -1,7 +1,7 @@
 use actix_web::{
-    get, patch, post,
+    delete, get, patch, post,
     web::{self, Json},
-    Scope,
+    HttpResponse, Scope,
 };
 use garde::Validate;
 use uuid::Uuid;
@@ -101,10 +101,30 @@ pub async fn update_user_handler(
     ))
 }
 
+#[utoipa::path(
+    path = "/user/{id}",
+    responses(
+        (status = 204),
+        (status = 404, body = ErrorDto)
+    )
+)]
+#[delete("/{id}")]
+pub async fn delete_user_handler(
+    state: web::Data<State>,
+    path: web::Path<Uuid>,
+) -> ServiceResult<HttpResponse> {
+    let id: Uuid = path.into_inner();
+
+    UserService::delete(&state.postgres, id).await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
 pub fn get_scope() -> Scope {
     web::scope("/user")
         .service(create_user_handler)
         .service(get_user_handler)
         .service(search_user_handler)
         .service(update_user_handler)
+        .service(delete_user_handler)
 }
