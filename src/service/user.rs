@@ -55,9 +55,11 @@ impl UserService {
     }
 
     pub async fn check_email_exists(db: &DatabaseConnection, email: String) -> ServiceResult<bool> {
+        let tx: DatabaseTransaction = db.begin().await?;
+
         Ok(UserEntity::find()
             .filter(UserColumn::Email.eq(email))
-            .one(db)
+            .one(&tx)
             .await?
             .is_some())
     }
