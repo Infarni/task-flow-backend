@@ -1,6 +1,7 @@
+use chrono::Local;
 use garde::rules::pattern::regex::Regex;
 use garde::Validate;
-use sea_orm::{IntoActiveModel, Set};
+use sea_orm::{IntoActiveModel, NotSet, Set};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
@@ -45,6 +46,21 @@ pub struct UserSearchQuery {
     pub offset: u64,
 }
 
+#[derive(Debug, Deserialize, Validate, ToSchema)]
+pub struct UserUpdateDto {
+    #[garde(pattern(Regex::new(constants::NAME_PATTERN).unwrap()), length(min = constants::NAME_MIN_LENGTH, max = constants::NAME_MAX_LENGTH))]
+    #[schema(example = "archdrdr")]
+    pub name: Option<String>,
+
+    #[garde(email)]
+    #[schema(example = "archdroider@proton.me")]
+    pub email: Option<String>,
+
+    #[garde(length(min = constants::PASSWORD_MIN_LENGTH, max = constants::PASSWORD_MAX_LENGTH))]
+    #[schema(example = "some_password12345")]
+    pub password: Option<String>,
+}
+
 impl IntoActiveModel<UserActiveModel> for UserCreateDto {
     fn into_active_model(self) -> UserActiveModel {
         UserActiveModel {
@@ -63,6 +79,27 @@ impl From<UserModel> for UserReadDto {
             email: value.email,
             created_at: value.created_at.to_rfc3339(),
             updated_at: value.updated_at.to_rfc3339(),
+        }
+    }
+}
+
+impl IntoActiveModel<UserActiveModel> for UserUpdateDto {
+    fn into_active_model(self) -> UserActiveModel {
+        UserActiveModel {
+            name: match self.name {
+                Some(name) => Set(name),
+                None => NotSet,
+            },
+            email: match self.email {
+                Some(email) => Set(email),
+                None => NotSet,
+            },
+            password: match self.password {
+                Some(password) => Set(password),
+                None => NotSet,
+            },
+            updated_at: Set(Local::now().fixed_offset()),
+            ..Default::default()
         }
     }
 }

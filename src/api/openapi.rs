@@ -4,7 +4,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::dto::{
     error::{ErrorDto, ValidateItemErrorDto},
-    user::{UserCreateDto, UserReadDto},
+    user::{UserCreateDto, UserReadDto, UserUpdateDto},
 };
 
 #[derive(OpenApi)]
@@ -12,9 +12,16 @@ use crate::dto::{
     paths(
         crate::api::user::create_user_handler,
         crate::api::user::get_user_handler,
-        crate::api::user::search_user_handler
+        crate::api::user::search_user_handler,
+        crate::api::user::update_user_handler,
     ),
-    components(schemas(UserCreateDto, UserReadDto, ErrorDto, ValidateItemErrorDto))
+    components(schemas(
+        UserCreateDto,
+        UserReadDto,
+        UserUpdateDto,
+        ErrorDto,
+        ValidateItemErrorDto
+    ))
 )]
 pub struct ApiDoc;
 

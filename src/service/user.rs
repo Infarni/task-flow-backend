@@ -1,10 +1,10 @@
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, DatabaseTransaction, EntityTrait,
-    IntoActiveModel, QueryFilter, QuerySelect, TransactionTrait, TryIntoModel,
+    IntoActiveModel, QueryFilter, QuerySelect, Set, TransactionTrait, TryIntoModel,
 };
 use uuid::Uuid;
 
-use crate::dto::user::{UserCreateDto, UserReadDto};
+use crate::dto::user::{UserCreateDto, UserReadDto, UserUpdateDto};
 use crate::entity::prelude::{UserActiveModel, UserColumn, UserEntity, UserModel};
 use crate::error::service::{ServiceError, ServiceResult};
 
@@ -95,5 +95,48 @@ impl UserService {
             .one(&tx)
             .await?
             .is_some())
+    }
+
+    pub async fn update(
+        db: &DatabaseConnection,
+        id: Uuid,
+        mut body: UserUpdateDto,
+    ) -> ServiceResult<UserReadDto> {
+        let tx: DatabaseTransaction = db.begin().await?;
+
+        Self::get_by_id(db, id).await?;
+
+        if let Some(name) = body.name.clone() {
+            if Self::check_name_exists(&db, name.clone()).await? {
+                return Err(ServiceError::Conflict {
+                    field: "name".to_string(),
+                    value: name.clone(),
+                });
+            }
+        }
+
+        if let Some(email) = body.email.clone() {
+            if Self::check_email_exists(&db, email.clone()).await? {
+                return Err(ServiceError::Conflict {
+                    field: "email".to_string(),
+                    value: email.clone(),
+                });
+            }
+        }
+
+        if let Some(password) = body.password {
+            body.password = Some(common::hash(password)?);
+        }
+
+        let mut active_model: UserActiveModel = body.into_active_model();
+        active_model.id = Set(id);
+
+        let model: UserModel = active_model.save(&tx).await?.try_into_model()?;
+
+        tx.commit().await?;
+
+        let schema: UserReadDto = UserReadDto::from(model);
+
+        Ok(schema)
     }
 }

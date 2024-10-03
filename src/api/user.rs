@@ -1,5 +1,5 @@
 use actix_web::{
-    get, post,
+    get, patch, post,
     web::{self, Json},
     Scope,
 };
@@ -7,7 +7,7 @@ use garde::Validate;
 use uuid::Uuid;
 
 use crate::{
-    dto::user::{UserCreateDto, UserReadDto, UserSearchQuery},
+    dto::user::{UserCreateDto, UserReadDto, UserSearchQuery, UserUpdateDto},
     error::service::ServiceResult,
     server::State,
     service::user::UserService,
@@ -76,9 +76,35 @@ pub async fn search_user_handler(
     ))
 }
 
+#[utoipa::path(
+    path = "/user/{id}",
+    request_body = UserUpdateDto,
+    responses(
+        (status = 201, body = UserReadDto),
+        (status = 404, body = ErrorDto),
+        (status = 409, body = ErrorDto),
+        (status = 422, body = [ValidateItemErrorDto])
+    )
+)]
+#[patch("/{id}")]
+pub async fn update_user_handler(
+    state: web::Data<State>,
+    path: web::Path<Uuid>,
+    body: web::Json<UserUpdateDto>,
+) -> ServiceResult<Json<UserReadDto>> {
+    body.validate()?;
+
+    let id: Uuid = path.into_inner();
+
+    Ok(Json(
+        UserService::update(&state.postgres, id, body.into_inner()).await?,
+    ))
+}
+
 pub fn get_scope() -> Scope {
     web::scope("/user")
         .service(create_user_handler)
         .service(get_user_handler)
         .service(search_user_handler)
+        .service(update_user_handler)
 }
