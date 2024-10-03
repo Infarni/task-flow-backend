@@ -9,7 +9,10 @@ use crate::dto::{
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(crate::api::user::create_user_handler),
+    paths(
+        crate::api::user::create_user_handler,
+        crate::api::user::get_user_handler
+    ),
     components(schemas(UserCreateDto, UserReadDto, ErrorDto, ValidateItemErrorDto))
 )]
 pub struct ApiDoc;

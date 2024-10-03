@@ -1,7 +1,8 @@
 use sea_orm::{
     ActiveModelTrait, ColumnTrait, DatabaseConnection, DatabaseTransaction, EntityTrait,
-    IntoActiveModel, QueryFilter, TransactionTrait, TryIntoModel,
+    IntoActiveModel, QueryFilter, QuerySelect, TransactionTrait, TryIntoModel,
 };
+use uuid::Uuid;
 
 use crate::dto::user::{UserCreateDto, UserReadDto};
 use crate::entity::prelude::{UserActiveModel, UserColumn, UserEntity, UserModel};
@@ -42,6 +43,38 @@ impl UserService {
         let schema: UserReadDto = UserReadDto::from(model);
 
         Ok(schema)
+    }
+
+    pub async fn get_by_id(db: &DatabaseConnection, id: Uuid) -> ServiceResult<UserReadDto> {
+        let tx: DatabaseTransaction = db.begin().await?;
+
+        match UserEntity::find_by_id(id).one(&tx).await? {
+            Some(value) => Ok(UserReadDto::from(value)),
+            None => Err(ServiceError::NotFound(id)),
+        }
+    }
+
+    pub async fn search_by_name(
+        db: &DatabaseConnection,
+        name: String,
+        limit: u64,
+        offset: u64,
+    ) -> ServiceResult<Vec<UserReadDto>> {
+        let tx: DatabaseTransaction = db.begin().await?;
+
+        let models = UserEntity::find()
+            .filter(UserColumn::Name.like(name))
+            .limit(limit)
+            .offset(offset)
+            .all(&tx)
+            .await?;
+
+        let schemas = models
+            .into_iter()
+            .map(|m| UserReadDto::from(m))
+            .collect::<Vec<UserReadDto>>();
+
+        Ok(schemas)
     }
 
     pub async fn check_name_exists(db: &DatabaseConnection, name: String) -> ServiceResult<bool> {

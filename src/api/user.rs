@@ -1,9 +1,10 @@
 use actix_web::{
-    post,
+    get, post,
     web::{self, Json},
     Scope,
 };
 use garde::Validate;
+use uuid::Uuid;
 
 use crate::{
     dto::user::{UserCreateDto, UserReadDto},
@@ -33,6 +34,25 @@ pub async fn create_user_handler(
     ))
 }
 
+#[utoipa::path(
+    path = "/user/{id}",
+    responses(
+        (status = 200, body = UserReadDto),
+        (status = 404, body = ErrorDto),
+    )
+)]
+#[get("/{id}")]
+pub async fn get_user_handler(
+    state: web::Data<State>,
+    params: web::Path<Uuid>,
+) -> ServiceResult<Json<UserReadDto>> {
+    let id: Uuid = params.into_inner();
+
+    Ok(Json(UserService::get_by_id(&state.postgres, id).await?))
+}
+
 pub fn get_scope() -> Scope {
-    web::scope("/user").service(create_user_handler)
+    web::scope("/user")
+        .service(create_user_handler)
+        .service(get_user_handler)
 }
