@@ -38,6 +38,13 @@ pub struct UserReadDto {
     pub updated_at: String,
 }
 
+#[derive(Debug, Deserialize, ToSchema)]
+pub struct UserSearchQuery {
+    pub name: String,
+    pub limit: u64,
+    pub offset: u64,
+}
+
 impl IntoActiveModel<UserActiveModel> for UserCreateDto {
     fn into_active_model(self) -> UserActiveModel {
         UserActiveModel {

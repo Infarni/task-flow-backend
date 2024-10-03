@@ -11,7 +11,8 @@ use crate::dto::{
 #[openapi(
     paths(
         crate::api::user::create_user_handler,
-        crate::api::user::get_user_handler
+        crate::api::user::get_user_handler,
+        crate::api::user::search_user_handler
     ),
     components(schemas(UserCreateDto, UserReadDto, ErrorDto, ValidateItemErrorDto))
 )]

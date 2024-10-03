@@ -63,7 +63,7 @@ impl UserService {
         let tx: DatabaseTransaction = db.begin().await?;
 
         let models = UserEntity::find()
-            .filter(UserColumn::Name.like(name))
+            .filter(UserColumn::Name.contains(name))
             .limit(limit)
             .offset(offset)
             .all(&tx)
