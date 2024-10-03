@@ -19,17 +19,20 @@ pub enum ServiceError {
     #[error(transparent)]
     Validation(#[from] Report),
 
+    #[error("Error with hashing value")]
+    Hash,
+
     #[error("Unknow db error")]
     Unknow(#[from] DbErr),
 }
 
 impl ResponseError for ServiceError {
     fn status_code(&self) -> StatusCode {
-        match *self {
+        match self {
             ServiceError::Conflict { field: _, value: _ } => StatusCode::CONFLICT,
             ServiceError::NotFound(_) => StatusCode::NOT_FOUND,
             ServiceError::Validation(_) => StatusCode::UNPROCESSABLE_ENTITY,
-            ServiceError::Unknow(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 

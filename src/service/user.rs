@@ -7,12 +7,14 @@ use crate::dto::user::{UserCreateDto, UserReadDto};
 use crate::entity::prelude::{UserActiveModel, UserColumn, UserEntity, UserModel};
 use crate::error::service::{ServiceError, ServiceResult};
 
+use super::common;
+
 pub struct UserService;
 
 impl UserService {
     pub async fn create(
         db: &DatabaseConnection,
-        body: UserCreateDto,
+        mut body: UserCreateDto,
     ) -> ServiceResult<UserReadDto> {
         let tx: DatabaseTransaction = db.begin().await?;
 
@@ -29,6 +31,8 @@ impl UserService {
                 value: body.email.clone(),
             });
         }
+
+        body.password = common::hash(body.password)?;
 
         let active_model: UserActiveModel = body.into_active_model();
         let model: UserModel = active_model.save(&tx).await?.try_into_model()?;

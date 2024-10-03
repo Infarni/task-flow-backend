@@ -19,6 +19,7 @@ pub struct UserCreateDto {
     pub email: String,
 
     #[garde(length(min = constants::PASSWORD_MIN_LENGTH, max = constants::NAME_MAX_LENGTH))]
+    #[schema(example = "some_password12345")]
     pub password: String,
 }
 

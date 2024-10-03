@@ -13,7 +13,7 @@ use crate::{
 };
 
 #[utoipa::path(
-    path = "/api/user",
+    path = "/user",
     request_body = UserCreateDto,
     responses(
         (status = 201, body = UserReadDto),
