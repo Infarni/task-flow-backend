@@ -1,8 +1,5 @@
 use utoipa::{
-    openapi::{
-        self,
-        security::{HttpBuilder, SecurityScheme},
-    },
+    openapi::security::{ApiKey, ApiKeyValue, SecurityScheme},
     Modify, OpenApi,
 };
 
@@ -17,6 +14,7 @@ use crate::dto::{
     paths(
         crate::api::user::create_user_handler,
         crate::api::user::get_user_handler,
+        crate::api::user::get_user_by_id_handler,
         crate::api::user::search_user_handler,
         crate::api::user::update_user_handler,
         crate::api::user::delete_user_handler,
@@ -31,6 +29,7 @@ use crate::dto::{
         SignInDto,
         TokenDto
     )),
+    security(("JWT token" = [])),
     modifiers(&BearerAuth)
 )]
 pub struct ApiDoc;
@@ -39,14 +38,13 @@ pub struct BearerAuth;
 impl Modify for BearerAuth {
     fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
         let components = openapi.components.as_mut().unwrap();
+
         components.add_security_scheme(
-            "bearer_auth",
-            SecurityScheme::Http(
-                HttpBuilder::new()
-                    .scheme(openapi::security::HttpAuthScheme::Bearer)
-                    .bearer_format("JWT")
-                    .build(),
-            ),
+            "JWT token",
+            SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::with_description(
+                "Authorization",
+                "Access token",
+            ))),
         );
     }
 }

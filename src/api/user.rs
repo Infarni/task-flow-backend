@@ -1,13 +1,12 @@
-use actix_web::{
-    delete, get, patch, post,
-    web::{self, Json},
-    HttpResponse, Scope,
-};
+use actix_web::{delete, get, patch, post, web, HttpResponse, Scope};
 use garde::Validate;
 use uuid::Uuid;
 
 use crate::{
-    dto::user::{UserCreateDto, UserReadDto, UserSearchQuery, UserUpdateDto},
+    dto::{
+        auth::ClaimsDto,
+        user::{UserCreateDto, UserSearchQuery, UserUpdateDto},
+    },
     error::service::ServiceResult,
     server::State,
     service::user::UserService,
@@ -20,18 +19,35 @@ use crate::{
         (status = 201, body = UserReadDto),
         (status = 409, body = ErrorDto),
         (status = 422, body = [ValidateItemErrorDto])
-    )
+    ),
+    security()
 )]
 #[post("")]
 pub async fn create_user_handler(
     state: web::Data<State>,
     body: web::Json<UserCreateDto>,
-) -> ServiceResult<Json<UserReadDto>> {
+) -> ServiceResult<HttpResponse> {
     body.validate()?;
 
-    Ok(Json(
-        UserService::create(&state.postgres, body.into_inner()).await?,
-    ))
+    Ok(
+        HttpResponse::Created()
+            .json(UserService::create(&state.postgres, body.into_inner()).await?),
+    )
+}
+
+#[utoipa::path(
+    path = "/user/me",
+    responses(
+        (status = 200, body = UserReadDto),
+        (status = 404, body = ErrorDto),
+    ),
+)]
+#[get("/me")]
+pub async fn get_user_handler(
+    state: web::Data<State>,
+    claims: ClaimsDto,
+) -> ServiceResult<HttpResponse> {
+    Ok(HttpResponse::Ok().json(UserService::get_by_id(&state.postgres, claims.sub).await?))
 }
 
 #[utoipa::path(
@@ -39,16 +55,17 @@ pub async fn create_user_handler(
     responses(
         (status = 200, body = UserReadDto),
         (status = 404, body = ErrorDto),
-    )
+    ),
 )]
 #[get("/{id}")]
-pub async fn get_user_handler(
+pub async fn get_user_by_id_handler(
     state: web::Data<State>,
     path: web::Path<Uuid>,
-) -> ServiceResult<Json<UserReadDto>> {
-    let id: Uuid = path.into_inner();
+    _: ClaimsDto,
+) -> ServiceResult<HttpResponse> {
+    let id = path.into_inner();
 
-    Ok(Json(UserService::get_by_id(&state.postgres, id).await?))
+    Ok(HttpResponse::Ok().json(UserService::get_by_id(&state.postgres, id).await?))
 }
 
 #[utoipa::path(
@@ -66,56 +83,50 @@ pub async fn get_user_handler(
 pub async fn search_user_handler(
     state: web::Data<State>,
     query: web::Query<UserSearchQuery>,
-) -> ServiceResult<Json<Vec<UserReadDto>>> {
+) -> ServiceResult<HttpResponse> {
     let name: String = query.name.clone();
     let limit: u64 = query.limit;
     let offset: u64 = query.offset;
 
-    Ok(Json(
-        UserService::search_by_name(&state.postgres, name, limit, offset).await?,
-    ))
+    Ok(HttpResponse::Ok()
+        .json(UserService::search_by_name(&state.postgres, name, limit, offset).await?))
 }
 
 #[utoipa::path(
-    path = "/user/{id}",
+    path = "/user/me",
     request_body = UserUpdateDto,
     responses(
-        (status = 201, body = UserReadDto),
+        (status = 200, body = UserReadDto),
         (status = 404, body = ErrorDto),
         (status = 409, body = ErrorDto),
         (status = 422, body = [ValidateItemErrorDto])
     )
 )]
-#[patch("/{id}")]
+#[patch("/me")]
 pub async fn update_user_handler(
     state: web::Data<State>,
-    path: web::Path<Uuid>,
     body: web::Json<UserUpdateDto>,
-) -> ServiceResult<Json<UserReadDto>> {
+    claims: ClaimsDto,
+) -> ServiceResult<HttpResponse> {
     body.validate()?;
 
-    let id: Uuid = path.into_inner();
-
-    Ok(Json(
-        UserService::update(&state.postgres, id, body.into_inner()).await?,
-    ))
+    Ok(HttpResponse::Ok()
+        .json(UserService::update(&state.postgres, claims.sub, body.into_inner()).await?))
 }
 
 #[utoipa::path(
-    path = "/user/{id}",
+    path = "/user/me",
     responses(
         (status = 204),
         (status = 404, body = ErrorDto)
     )
 )]
-#[delete("/{id}")]
+#[delete("/me")]
 pub async fn delete_user_handler(
     state: web::Data<State>,
-    path: web::Path<Uuid>,
+    claims: ClaimsDto,
 ) -> ServiceResult<HttpResponse> {
-    let id: Uuid = path.into_inner();
-
-    UserService::delete(&state.postgres, id).await?;
+    UserService::delete(&state.postgres, claims.sub).await?;
 
     Ok(HttpResponse::NoContent().finish())
 }
@@ -124,6 +135,7 @@ pub fn get_scope() -> Scope {
     web::scope("/user")
         .service(create_user_handler)
         .service(get_user_handler)
+        .service(get_user_by_id_handler)
         .service(search_user_handler)
         .service(update_user_handler)
         .service(delete_user_handler)

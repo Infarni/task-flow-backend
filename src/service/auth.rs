@@ -48,7 +48,9 @@ impl AuthService {
                 token: Self::gen_token(id, expire, secret)?,
             })
         } else {
-            Err(ServiceError::InvalidCredentials)
+            Err(ServiceError::InvalidCredentials(
+                "Invalid password".to_string(),
+            ))
         }
     }
 }

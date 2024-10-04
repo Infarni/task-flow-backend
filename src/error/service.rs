@@ -25,11 +25,14 @@ pub enum ServiceError {
     #[error("Error with creating token")]
     Token,
 
-    #[error("Invalid credentials")]
-    InvalidCredentials,
+    #[error("Invalid credentials: {0}")]
+    InvalidCredentials(String),
 
     #[error("Unknow db error")]
-    Unknow(#[from] DbErr),
+    UnknowDb(#[from] DbErr),
+
+    #[error("Error: {0}")]
+    Unknow(String),
 }
 
 impl ResponseError for ServiceError {
@@ -38,7 +41,7 @@ impl ResponseError for ServiceError {
             ServiceError::Conflict { field: _, value: _ } => StatusCode::CONFLICT,
             ServiceError::NotFound(_) => StatusCode::NOT_FOUND,
             ServiceError::Validation(_) => StatusCode::UNPROCESSABLE_ENTITY,
-            ServiceError::InvalidCredentials => StatusCode::UNAUTHORIZED,
+            ServiceError::InvalidCredentials(_) => StatusCode::UNAUTHORIZED,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

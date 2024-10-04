@@ -70,7 +70,9 @@ impl UserService {
             .await?
         {
             Some(value) => Ok((value.id, value.password)),
-            None => Err(ServiceError::InvalidCredentials),
+            None => Err(ServiceError::InvalidCredentials(
+                "Invalid login".to_string(),
+            )),
         }
     }
 

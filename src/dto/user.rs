@@ -29,6 +29,9 @@ pub struct UserReadDto {
     #[schema(example = "00000000-0000-0000-0000-000000000000")]
     pub id: Uuid,
 
+    #[schema(example = "archdrdr")]
+    pub name: String,
+
     #[schema(example = "archdroider@proton.me")]
     pub email: String,
 
@@ -76,6 +79,7 @@ impl From<UserModel> for UserReadDto {
     fn from(value: UserModel) -> Self {
         Self {
             id: value.id,
+            name: value.name,
             email: value.email,
             created_at: value.created_at.to_rfc3339(),
             updated_at: value.updated_at.to_rfc3339(),

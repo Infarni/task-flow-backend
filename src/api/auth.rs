@@ -1,34 +1,28 @@
-use actix_web::{
-    post,
-    web::{self, Json},
-    Scope,
-};
+use actix_web::{post, web, HttpResponse, Scope};
 use garde::Validate;
 
 use crate::{
-    dto::auth::{SignInDto, TokenDto},
-    error::service::ServiceResult,
-    server::State,
-    service::auth::AuthService,
+    dto::auth::SignInDto, error::service::ServiceResult, server::State, service::auth::AuthService,
 };
 
 #[utoipa::path(
     path = "/auth/sign_in",
     request_body = SignInDto,
     responses(
-        (status = 201, body = TokenDto),
+        (status = 200, body = TokenDto),
         (status = 401, body = ErrorDto),
         (status = 422, body = ErrorDto)
-    )
+    ),
+    security()
 )]
 #[post("/sign_in")]
 pub async fn sign_in_handler(
     state: web::Data<State>,
     body: web::Json<SignInDto>,
-) -> ServiceResult<Json<TokenDto>> {
+) -> ServiceResult<HttpResponse> {
     body.validate()?;
 
-    Ok(Json(
+    Ok(HttpResponse::Ok().json(
         AuthService::sign_in(
             &state.postgres,
             body.into_inner(),
