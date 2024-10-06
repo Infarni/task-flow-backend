@@ -8,3 +8,4 @@ pub const PASSWORD_MIN_LENGTH: usize = 8;
 pub const PASSWORD_MAX_LENGTH: usize = 128;
 
 pub const AVATAR_MAX_SIZE: usize = 5 * 1024 * 1024;
+pub const AVATAR_SIDE_SIZE: usize = 518;

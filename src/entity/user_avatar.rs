@@ -8,6 +8,7 @@ use crate::constants;
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
+    #[sea_orm(unique)]
     pub user_id: Uuid,
     #[sea_orm(column_type = "Binary(constants::AVATAR_MAX_SIZE as u32)", nullable)]
     pub file: Option<Vec<u8>>,

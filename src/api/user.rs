@@ -1,3 +1,4 @@
+use actix_multipart::Multipart;
 use actix_web::{delete, get, patch, post, web, HttpResponse, Scope};
 use garde::Validate;
 use uuid::Uuid;
@@ -9,7 +10,7 @@ use crate::{
     },
     error::service::ServiceResult,
     server::State,
-    service::user::UserService,
+    service::{user::UserService, user_avatar::UserAvatarService},
 };
 
 #[utoipa::path(
@@ -33,6 +34,80 @@ pub async fn create_user_handler(
         HttpResponse::Created()
             .json(UserService::create(&state.postgres, body.into_inner()).await?),
     )
+}
+
+#[utoipa::path(
+    path = "/user/me/avatar",
+    request_body(content = UserAvatarUploadDto, content_type = "multipart/form-data"),
+    responses(
+        (status = 201, body = [u8], content_type = "image/png"),
+        (status = 409, body = ErrorDto),
+        (status = 422, body = ErrorDto)
+    )
+)]
+#[post("/me/avatar")]
+pub async fn create_avatar_handler(
+    state: web::Data<State>,
+    claims: ClaimsDto,
+    body: Multipart,
+) -> ServiceResult<HttpResponse> {
+    Ok(HttpResponse::Created()
+        .content_type("image/png")
+        .body(UserAvatarService::set(&state.postgres, claims.sub, body).await?))
+}
+
+#[utoipa::path(
+    path = "/user/me/avatar",
+    responses(
+        (status = 200, body = [u8], content_type = "image/png"),
+        (status = 404, body = ErrorDto)
+    )
+)]
+#[get("/me/avatar")]
+pub async fn get_avatar_handler(
+    state: web::Data<State>,
+    claims: ClaimsDto,
+) -> ServiceResult<HttpResponse> {
+    Ok(HttpResponse::Ok()
+        .content_type("image/png")
+        .body(UserAvatarService::get_by_user_id(&state.postgres, claims.sub).await?))
+}
+
+#[utoipa::path(
+    path = "/user/{id}/avatar",
+    responses(
+        (status = 200, body = [u8], content_type = "image/png"),
+        (status = 404, body = ErrorDto)
+    )
+)]
+#[get("/{id}/avatar")]
+pub async fn get_avatar_by_user_id_handler(
+    state: web::Data<State>,
+    path: web::Path<Uuid>,
+    _: ClaimsDto,
+) -> ServiceResult<HttpResponse> {
+    let id: Uuid = path.into_inner();
+
+    Ok(HttpResponse::Ok()
+        .content_type("image/png")
+        .body(UserAvatarService::get_by_user_id(&state.postgres, id).await?))
+}
+
+#[utoipa::path(
+    path = "/user/me/avatar",
+    responses(
+        (status = 204),
+        (status = 404, body = ErrorDto)
+    )
+)]
+#[delete("/me/avatar")]
+pub async fn delete_avatar_handler(
+    state: web::Data<State>,
+    claims: ClaimsDto,
+) -> ServiceResult<HttpResponse> {
+    UserAvatarService::delete(&state.postgres, claims.sub).await?;
+
+    Ok(HttpResponse::NoContent().finish())
 }
 
 #[utoipa::path(
@@ -139,4 +214,8 @@ pub fn get_scope() -> Scope {
         .service(search_user_handler)
         .service(update_user_handler)
         .service(delete_user_handler)
+        .service(create_avatar_handler)
+        .service(get_avatar_handler)
+        .service(delete_avatar_handler)
+        .service(get_avatar_by_user_id_handler)
 }

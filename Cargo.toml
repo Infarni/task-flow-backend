@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+actix-multipart = "0.7.2"
 actix-web = "4.9.0"
 argon2 = "0.5.3"
 async-trait = "0.1.83"
@@ -11,7 +12,9 @@ chrono = "0.4.38"
 clap = { version = "4.5.19", features = ["derive"] }
 config = "0.14.0"
 env_logger = "0.11.5"
+futures = "0.3.31"
 garde = { version = "0.20.0", features = ["derive", "email", "pattern", "serde", "regex"] }
+image = "0.25.2"
 jsonwebtoken = "9.3.0"
 log = "0.4.22"
 sea-orm = { version = "1.0.1", features = ["sqlx-postgres", "runtime-tokio-rustls", "macros", "with-chrono", "with-uuid"] }

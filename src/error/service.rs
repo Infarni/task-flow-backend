@@ -1,5 +1,7 @@
+use actix_multipart::MultipartError;
 use actix_web::{http::StatusCode, HttpResponse, ResponseError};
 use garde::Report;
+use image::ImageError;
 use sea_orm::DbErr;
 use thiserror::Error;
 use uuid::Uuid;
@@ -30,6 +32,15 @@ pub enum ServiceError {
 
     #[error("Unknow db error")]
     UnknowDb(#[from] DbErr),
+
+    #[error("Multipart error")]
+    Multipart(#[from] MultipartError),
+
+    #[error("Image error: {0}")]
+    InvalidImage(#[from] ImageError),
+
+    #[error("File is to large")]
+    LargeFile,
 
     #[error("Error: {0}")]
     Unknow(String),

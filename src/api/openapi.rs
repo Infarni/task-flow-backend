@@ -6,7 +6,7 @@ use utoipa::{
 use crate::dto::{
     auth::{SignInDto, TokenDto},
     error::{ErrorDto, ValidateItemErrorDto},
-    user::{UserCreateDto, UserReadDto, UserUpdateDto},
+    user::{UserAvatarUploadDto, UserCreateDto, UserReadDto, UserUpdateDto},
 };
 
 #[derive(OpenApi)]
@@ -18,7 +18,11 @@ use crate::dto::{
         crate::api::user::search_user_handler,
         crate::api::user::update_user_handler,
         crate::api::user::delete_user_handler,
-        crate::api::auth::sign_in_handler
+        crate::api::auth::sign_in_handler,
+        crate::api::user::create_avatar_handler,
+        crate::api::user::get_avatar_handler,
+        crate::api::user::delete_avatar_handler,
+        crate::api::user::get_avatar_by_user_id_handler
     ),
     components(schemas(
         UserCreateDto,
@@ -27,7 +31,8 @@ use crate::dto::{
         ErrorDto,
         ValidateItemErrorDto,
         SignInDto,
-        TokenDto
+        TokenDto,
+        UserAvatarUploadDto
     )),
     security(("JWT token" = [])),
     modifiers(&BearerAuth)

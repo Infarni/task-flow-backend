@@ -63,7 +63,12 @@ impl MigrationTrait for Migration {
                             .primary_key()
                             .default(Func::cust(GenerateUuidFunc)),
                     )
-                    .col(ColumnDef::new(UserAvatar::UserId).uuid().not_null())
+                    .col(
+                        ColumnDef::new(UserAvatar::UserId)
+                            .uuid()
+                            .not_null()
+                            .unique_key(),
+                    )
                     .col(
                         ColumnDef::new(UserAvatar::File)
                             .var_binary(constants::AVATAR_MAX_SIZE as u32)

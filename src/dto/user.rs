@@ -1,3 +1,5 @@
+use actix_multipart::form::tempfile::TempFile;
+use actix_multipart::form::MultipartForm;
 use chrono::Local;
 use garde::rules::pattern::regex::Regex;
 use garde::Validate;
@@ -22,6 +24,12 @@ pub struct UserCreateDto {
     #[garde(length(min = constants::PASSWORD_MIN_LENGTH, max = constants::PASSWORD_MAX_LENGTH))]
     #[schema(example = "some_password12345")]
     pub password: String,
+}
+
+#[derive(Debug, MultipartForm, ToSchema)]
+pub struct UserAvatarUploadDto {
+    #[schema(value_type = String, format = Binary)]
+    pub image: TempFile,
 }
 
 #[derive(Debug, Serialize, ToSchema)]
