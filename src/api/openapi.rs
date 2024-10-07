@@ -7,7 +7,7 @@ use crate::{
     dto::{
         auth::{SignInDto, TokenDto},
         error::{ErrorDto, ValidateItemErrorDto},
-        task::{TaskCreateDto, TaskReadDto},
+        task::{TaskCreateDto, TaskGetQuery, TaskReadDto, TaskUpdateDto},
         user::{UserAvatarUploadDto, UserCreateDto, UserReadDto, UserUpdateDto},
     },
     entity::sea_orm_active_enums::TaskStatus,
@@ -28,6 +28,8 @@ use crate::{
         crate::api::user::delete_avatar_handler,
         crate::api::user::get_avatar_by_user_id_handler,
         crate::api::task::create_task_handler,
+        crate::api::task::get_task_handler,
+        crate::api::task::update_task_handler,
     ),
     components(schemas(
         UserCreateDto,
@@ -41,6 +43,8 @@ use crate::{
         TaskReadDto,
         TaskCreateDto,
         TaskStatus,
+        TaskGetQuery,
+        TaskUpdateDto,
     )),
     security(("JWT token" = [])),
     modifiers(&BearerAuth)

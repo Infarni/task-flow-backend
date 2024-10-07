@@ -30,7 +30,7 @@ pub enum ServiceError {
     #[error("Invalid credentials: {0}")]
     InvalidCredentials(String),
 
-    #[error("Unknow db error")]
+    #[error("Unknow db error: {0}")]
     UnknowDb(#[from] DbErr),
 
     #[error("Multipart error")]
