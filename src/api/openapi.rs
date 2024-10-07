@@ -3,10 +3,14 @@ use utoipa::{
     Modify, OpenApi,
 };
 
-use crate::dto::{
-    auth::{SignInDto, TokenDto},
-    error::{ErrorDto, ValidateItemErrorDto},
-    user::{UserAvatarUploadDto, UserCreateDto, UserReadDto, UserUpdateDto},
+use crate::{
+    dto::{
+        auth::{SignInDto, TokenDto},
+        error::{ErrorDto, ValidateItemErrorDto},
+        task::{TaskCreateDto, TaskReadDto},
+        user::{UserAvatarUploadDto, UserCreateDto, UserReadDto, UserUpdateDto},
+    },
+    entity::sea_orm_active_enums::TaskStatus,
 };
 
 #[derive(OpenApi)]
@@ -22,7 +26,8 @@ use crate::dto::{
         crate::api::user::create_avatar_handler,
         crate::api::user::get_avatar_handler,
         crate::api::user::delete_avatar_handler,
-        crate::api::user::get_avatar_by_user_id_handler
+        crate::api::user::get_avatar_by_user_id_handler,
+        crate::api::task::create_task_handler,
     ),
     components(schemas(
         UserCreateDto,
@@ -32,7 +37,10 @@ use crate::dto::{
         ValidateItemErrorDto,
         SignInDto,
         TokenDto,
-        UserAvatarUploadDto
+        UserAvatarUploadDto,
+        TaskReadDto,
+        TaskCreateDto,
+        TaskStatus,
     )),
     security(("JWT token" = [])),
     modifiers(&BearerAuth)

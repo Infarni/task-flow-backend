@@ -1,6 +1,7 @@
 use std::io::Cursor;
 
 use actix_multipart::Multipart;
+use chrono::Local;
 use futures::{StreamExt, TryStreamExt};
 use image::{imageops, RgbaImage};
 use sea_orm::{
@@ -64,7 +65,8 @@ impl UserAvatarService {
             },
         };
 
-        active_model.file = Set(Some(saved_file.clone()));
+        active_model.file = Set(saved_file.clone());
+        active_model.updated_at = Set(Local::now().fixed_offset());
         active_model.save(&tx).await?;
 
         tx.commit().await?;
@@ -80,10 +82,7 @@ impl UserAvatarService {
             .one(&tx)
             .await?
         {
-            Some(value) => match value.file {
-                Some(value) => Ok(value),
-                None => Err(ServiceError::NotFound(user_id)),
-            },
+            Some(value) => Ok(value.file),
             None => Err(ServiceError::NotFound(user_id)),
         }
     }

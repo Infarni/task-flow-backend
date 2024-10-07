@@ -1,4 +1,5 @@
 mod create_table_extension;
+mod create_task_table;
 mod create_user_table;
 
 use sea_orm_migration::{MigrationTrait, MigratorTrait};
@@ -10,6 +11,7 @@ impl MigratorTrait for Migrator {
         vec![
             Box::new(create_table_extension::Migration),
             Box::new(create_user_table::Migration),
+            Box::new(create_task_table::Migration),
         ]
     }
 }
