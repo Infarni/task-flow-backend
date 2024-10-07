@@ -48,6 +48,8 @@ impl TaskService {
 
         if let Some(value) = status {
             query = query.and(TaskColumn::Status.eq(value));
+        } else {
+            query = query.and(TaskColumn::Status.ne(TaskStatus::Done))
         }
 
         let models: Vec<TaskModel> = TaskEntity::find()
