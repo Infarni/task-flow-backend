@@ -7,7 +7,10 @@ use crate::{
     dto::{
         auth::{SignInDto, TokenDto},
         error::{ErrorDto, ValidateItemErrorDto},
-        task::{TaskCreateDto, TaskGetQuery, TaskReadDto, TaskUpdateDto},
+        task::{
+            TaskCommentCreateDto, TaskCommentGetQuery, TaskCommentReadDto, TaskCommentUpdateDto,
+            TaskCreateDto, TaskGetQuery, TaskReadDto, TaskUpdateDto,
+        },
         user::{UserAvatarUploadDto, UserCreateDto, UserReadDto, UserUpdateDto},
     },
     entity::sea_orm_active_enums::TaskStatus,
@@ -16,20 +19,28 @@ use crate::{
 #[derive(OpenApi)]
 #[openapi(
     paths(
+        // User
         crate::api::user::create_user_handler,
         crate::api::user::get_user_handler,
         crate::api::user::get_user_by_id_handler,
         crate::api::user::search_user_handler,
         crate::api::user::update_user_handler,
         crate::api::user::delete_user_handler,
-        crate::api::auth::sign_in_handler,
         crate::api::user::create_avatar_handler,
         crate::api::user::get_avatar_handler,
         crate::api::user::delete_avatar_handler,
         crate::api::user::get_avatar_by_user_id_handler,
+        // Auth
+        crate::api::auth::sign_in_handler,
+        // Task
         crate::api::task::create_task_handler,
         crate::api::task::get_task_handler,
         crate::api::task::update_task_handler,
+        crate::api::task::delete_task_handler,
+        crate::api::task::create_task_comment_handler,
+        crate::api::task::get_task_comment_handler,
+        crate::api::task::update_task_comment_handler,
+        crate::api::task::delete_task_comment_handler,
     ),
     components(schemas(
         UserCreateDto,
@@ -45,6 +56,10 @@ use crate::{
         TaskStatus,
         TaskGetQuery,
         TaskUpdateDto,
+        TaskCommentCreateDto,
+        TaskCommentReadDto,
+        TaskCommentGetQuery,
+        TaskCommentUpdateDto,
     )),
     security(("JWT token" = [])),
     modifiers(&BearerAuth)

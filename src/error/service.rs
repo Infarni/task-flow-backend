@@ -30,6 +30,9 @@ pub enum ServiceError {
     #[error("Invalid credentials: {0}")]
     InvalidCredentials(String),
 
+    #[error("Forbidden")]
+    Forbidden,
+
     #[error("Unknow db error: {0}")]
     UnknowDb(#[from] DbErr),
 
@@ -49,9 +52,13 @@ pub enum ServiceError {
 impl ResponseError for ServiceError {
     fn status_code(&self) -> StatusCode {
         match self {
+            ServiceError::Forbidden => StatusCode::FORBIDDEN,
             ServiceError::Conflict { field: _, value: _ } => StatusCode::CONFLICT,
             ServiceError::NotFound(_) => StatusCode::NOT_FOUND,
-            ServiceError::Validation(_) => StatusCode::UNPROCESSABLE_ENTITY,
+            ServiceError::Validation(_)
+            | ServiceError::Multipart(_)
+            | ServiceError::InvalidImage(_)
+            | ServiceError::LargeFile => StatusCode::UNPROCESSABLE_ENTITY,
             ServiceError::InvalidCredentials(_) => StatusCode::UNAUTHORIZED,
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }

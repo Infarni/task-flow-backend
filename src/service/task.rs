@@ -1,6 +1,7 @@
 use sea_orm::{
     sea_query::SimpleExpr, ActiveModelTrait, ColumnTrait, DatabaseConnection, DatabaseTransaction,
-    EntityTrait, IntoActiveModel, QueryFilter, QuerySelect, Set, TransactionTrait, TryIntoModel,
+    EntityTrait, IntoActiveModel, ModelTrait, QueryFilter, QuerySelect, Set, TransactionTrait,
+    TryIntoModel,
 };
 use uuid::Uuid;
 
@@ -35,7 +36,7 @@ impl TaskService {
         Ok(schema)
     }
 
-    pub async fn get(
+    pub async fn list(
         db: &DatabaseConnection,
         user_id: Uuid,
         limit: u64,
@@ -78,7 +79,7 @@ impl TaskService {
         match TaskEntity::find_by_id(id).one(&tx).await? {
             Some(value) => {
                 if value.user_id != user_id {
-                    return Err(ServiceError::NotFound(id));
+                    return Err(ServiceError::Forbidden);
                 }
             }
             None => return Err(ServiceError::NotFound(id)),
@@ -94,5 +95,26 @@ impl TaskService {
         let schema: TaskReadDto = TaskReadDto::from(model);
 
         Ok(schema)
+    }
+
+    pub async fn delete(db: &DatabaseConnection, user_id: Uuid, id: Uuid) -> ServiceResult {
+        let tx: DatabaseTransaction = db.begin().await?;
+
+        let model: TaskModel = match TaskEntity::find_by_id(id).one(&tx).await? {
+            Some(value) => {
+                if value.user_id != user_id {
+                    return Err(ServiceError::Forbidden);
+                } else {
+                    value
+                }
+            }
+            None => return Err(ServiceError::NotFound(id)),
+        };
+
+        model.delete(&tx).await?;
+
+        tx.commit().await?;
+
+        Ok(())
     }
 }
