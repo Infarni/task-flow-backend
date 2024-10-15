@@ -13,7 +13,7 @@ use crate::{
         },
         user::{UserAvatarUploadDto, UserCreateDto, UserReadDto, UserUpdateDto},
     },
-    entity::sea_orm_active_enums::TaskStatus,
+    entity::sea_orm_active_enums::{TaskPriority, TaskStatus},
 };
 
 #[derive(OpenApi)]
@@ -54,6 +54,7 @@ use crate::{
         TaskReadDto,
         TaskCreateDto,
         TaskStatus,
+        TaskPriority,
         TaskGetQuery,
         TaskUpdateDto,
         TaskCommentCreateDto,

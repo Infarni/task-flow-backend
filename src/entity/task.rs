@@ -1,4 +1,4 @@
-use super::sea_orm_active_enums::TaskStatus;
+use super::sea_orm_active_enums::{TaskPriority, TaskStatus};
 use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
@@ -10,6 +10,7 @@ pub struct Model {
     pub description: String,
     pub status: TaskStatus,
     pub deadline: Option<DateTimeWithTimeZone>,
+    pub priority: TaskPriority,
     pub user_id: Uuid,
     pub updated_at: DateTimeWithTimeZone,
     pub created_at: DateTimeWithTimeZone,

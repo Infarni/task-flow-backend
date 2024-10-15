@@ -67,6 +67,7 @@ pub async fn create_task_comment_handler(
         ("limit" = u64, Query, description = "Limit of tasks"),
         ("offset" = u64, Query, description = "Offset of tasks"),
         ("status" = Option<TaskStatus>, Query, description = "Task status"),
+        ("priority" = Option<TaskPriority>, Query, description = "Task priority")
     ),
     responses(
         (status = 200, body = [TaskReadDto])
@@ -85,6 +86,7 @@ pub async fn get_task_handler(
             query.limit,
             query.offset,
             query.status.clone(),
+            query.priority.clone(),
         )
         .await?,
     ))

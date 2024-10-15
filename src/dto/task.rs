@@ -10,7 +10,7 @@ use crate::constants;
 use crate::entity::prelude::{
     TaskActiveModel, TaskCommentActiveModel, TaskCommentModel, TaskModel,
 };
-use crate::entity::sea_orm_active_enums::TaskStatus;
+use crate::entity::sea_orm_active_enums::{TaskPriority, TaskStatus};
 
 #[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct TaskCreateDto {
@@ -29,6 +29,10 @@ pub struct TaskCreateDto {
     #[garde(skip)]
     #[schema(example = "2024-10-15T13:34:20.282397+03:00")]
     pub deadline: Option<DateTime<Local>>,
+
+    #[garde(skip)]
+    #[schema(example = "normal")]
+    pub priority: TaskPriority,
 }
 
 #[derive(Debug, Deserialize, Validate, ToSchema)]
@@ -45,6 +49,7 @@ pub struct TaskReadDto {
     pub description: String,
     pub status: TaskStatus,
     pub deadline: Option<String>,
+    pub priority: TaskPriority,
     pub updated_at: String,
     pub created_at: String,
 }
@@ -62,6 +67,7 @@ pub struct TaskGetQuery {
     pub limit: u64,
     pub offset: u64,
     pub status: Option<TaskStatus>,
+    pub priority: Option<TaskPriority>,
 }
 
 #[derive(Debug, Deserialize, ToSchema)]
@@ -87,6 +93,10 @@ pub struct TaskUpdateDto {
     #[garde(skip)]
     #[schema(example = "2024-10-15T13:34:20.282397+03:00")]
     pub deadline: Option<DateTime<Local>>,
+
+    #[garde(skip)]
+    #[schema(example = "hight")]
+    pub priority: Option<TaskPriority>,
 }
 
 #[derive(Debug, Deserialize, Validate, ToSchema)]
@@ -106,6 +116,7 @@ impl IntoActiveModel<TaskActiveModel> for TaskCreateDto {
                 Some(value) => Set(Some(value.fixed_offset())),
                 None => NotSet,
             },
+            priority: Set(self.priority),
             ..Default::default()
         }
     }
@@ -131,6 +142,7 @@ impl From<TaskModel> for TaskReadDto {
                 Some(value) => Some(value.to_rfc3339()),
                 None => None,
             },
+            priority: value.priority,
             created_at: value.created_at.to_rfc3339(),
             updated_at: value.updated_at.to_rfc3339(),
         }
@@ -165,6 +177,10 @@ impl IntoActiveModel<TaskActiveModel> for TaskUpdateDto {
             },
             deadline: match self.deadline {
                 Some(value) => Set(Some(value.fixed_offset())),
+                None => NotSet,
+            },
+            priority: match self.priority {
+                Some(value) => Set(value),
                 None => NotSet,
             },
             updated_at: Set(Local::now().fixed_offset()),

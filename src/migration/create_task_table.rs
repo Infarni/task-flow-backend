@@ -22,6 +22,15 @@ impl MigrationTrait for Migration {
             .await?;
 
         manager
+            .create_type(
+                Type::create()
+                    .as_enum(TaskPriority::name())
+                    .values(TaskPriority::iden_values())
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
             .create_table(
                 Table::create()
                     .table(Task::Table)
@@ -52,6 +61,11 @@ impl MigrationTrait for Migration {
                         ColumnDef::new(Task::Deadline)
                             .timestamp_with_time_zone()
                             .null(),
+                    )
+                    .col(
+                        ColumnDef::new(Task::Priority)
+                            .enumeration(TaskPriority::name(), TaskPriority::iden_values())
+                            .not_null(),
                     )
                     .col(ColumnDef::new(Task::UserId).uuid().not_null())
                     .col(
@@ -131,10 +145,27 @@ impl MigrationTrait for Migration {
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
-            .drop_table(Table::drop().table(Task::Table).to_owned())
+            .drop_table(Table::drop().if_exists().table(Task::Table).to_owned())
             .await?;
         manager
-            .drop_table(Table::drop().table(TaskComment::Table).to_owned())
+            .drop_table(
+                Table::drop()
+                    .if_exists()
+                    .table(TaskComment::Table)
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .drop_type(Type::drop().if_exists().name(TaskStatus::name()).to_owned())
+            .await?;
+        manager
+            .drop_type(
+                Type::drop()
+                    .if_exists()
+                    .name(TaskPriority::name())
+                    .to_owned(),
+            )
             .await?;
 
         Ok(())
@@ -149,6 +180,7 @@ pub enum Task {
     Description,
     Status,
     Deadline,
+    Priority,
     UserId,
     CreatedAt,
     UpdatedAt,
@@ -165,6 +197,19 @@ pub enum TaskStatus {
 
     #[sea_orm(string_value = "done")]
     Done,
+}
+
+#[derive(EnumIter, DeriveActiveEnum)]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "task_priority")]
+pub enum TaskPriority {
+    #[sea_orm(string_value = "low")]
+    Low,
+
+    #[sea_orm(string_value = "normal")]
+    Normal,
+
+    #[sea_orm(string_value = "hight")]
+    Hight,
 }
 
 #[derive(DeriveIden)]

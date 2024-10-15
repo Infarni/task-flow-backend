@@ -9,7 +9,7 @@ use crate::{
     dto::task::{TaskCreateDto, TaskReadDto, TaskUpdateDto},
     entity::{
         prelude::{TaskActiveModel, TaskColumn, TaskEntity, TaskModel},
-        sea_orm_active_enums::TaskStatus,
+        sea_orm_active_enums::{TaskPriority, TaskStatus},
     },
     error::service::{ServiceError, ServiceResult},
 };
@@ -42,6 +42,7 @@ impl TaskService {
         limit: u64,
         offset: u64,
         status: Option<TaskStatus>,
+        priority: Option<TaskPriority>,
     ) -> ServiceResult<Vec<TaskReadDto>> {
         let tx: DatabaseTransaction = db.begin().await?;
 
@@ -51,6 +52,10 @@ impl TaskService {
             query = query.and(TaskColumn::Status.eq(value));
         } else {
             query = query.and(TaskColumn::Status.ne(TaskStatus::Done))
+        }
+
+        if let Some(value) = priority {
+            query = query.and(TaskColumn::Priority.eq(value));
         }
 
         let models: Vec<TaskModel> = TaskEntity::find()

@@ -14,3 +14,16 @@ pub enum TaskStatus {
     #[sea_orm(string_value = "to_do")]
     ToDo,
 }
+
+#[derive(
+    Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize, ToSchema,
+)]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "task_priority")]
+pub enum TaskPriority {
+    #[sea_orm(string_value = "low")]
+    Low,
+    #[sea_orm(string_value = "normal")]
+    Normal,
+    #[sea_orm(string_value = "hight")]
+    Hight,
+}
