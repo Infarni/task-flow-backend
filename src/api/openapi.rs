@@ -72,7 +72,7 @@ impl Modify for BearerAuth {
         let components = openapi.components.as_mut().unwrap();
 
         components.add_security_scheme(
-            "jwt_token",
+            "JWT token",
             SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::with_description(
                 "Authorization",
                 "Access token",

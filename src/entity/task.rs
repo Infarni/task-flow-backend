@@ -9,6 +9,7 @@ pub struct Model {
     pub name: String,
     pub description: String,
     pub status: TaskStatus,
+    pub deadline: Option<DateTimeWithTimeZone>,
     pub user_id: Uuid,
     pub updated_at: DateTimeWithTimeZone,
     pub created_at: DateTimeWithTimeZone,

@@ -48,6 +48,11 @@ impl MigrationTrait for Migration {
                             .enumeration(TaskStatus::name(), TaskStatus::iden_values())
                             .not_null(),
                     )
+                    .col(
+                        ColumnDef::new(Task::Deadline)
+                            .timestamp_with_time_zone()
+                            .null(),
+                    )
                     .col(ColumnDef::new(Task::UserId).uuid().not_null())
                     .col(
                         ColumnDef::new(Task::UpdatedAt)
@@ -143,6 +148,7 @@ pub enum Task {
     Name,
     Description,
     Status,
+    Deadline,
     UserId,
     CreatedAt,
     UpdatedAt,
